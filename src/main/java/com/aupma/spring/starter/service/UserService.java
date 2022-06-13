@@ -3,11 +3,13 @@ package com.aupma.spring.starter.service;
 import com.aupma.spring.starter.entity.Permission;
 import com.aupma.spring.starter.entity.Role;
 import com.aupma.spring.starter.entity.User;
+import com.aupma.spring.starter.model.PermissionDTO;
 import com.aupma.spring.starter.model.RoleDTO;
 import com.aupma.spring.starter.model.UserDTO;
 import com.aupma.spring.starter.repos.PermissionRepository;
 import com.aupma.spring.starter.repos.RoleRepository;
 import com.aupma.spring.starter.repos.UserRepository;
+import com.aupma.spring.starter.util.Authorities;
 import com.aupma.spring.starter.util.SimplePage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +23,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -145,5 +149,21 @@ public class UserService implements UserDetailsService {
 
     public User getUser(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    @Component
+    static class RunAfterStartup {
+        public RunAfterStartup(PermissionService permissionService) throws IllegalAccessException {
+            for (Field field : Authorities.class.getFields()) {
+                Object target = new Object();
+                String value = (String) field.get(target);
+
+                PermissionDTO permissionDTO = new PermissionDTO();
+                permissionDTO.setCode(value);
+                permissionDTO.setDescription(value);
+
+                permissionService.create(permissionDTO);
+            }
+        }
     }
 }
