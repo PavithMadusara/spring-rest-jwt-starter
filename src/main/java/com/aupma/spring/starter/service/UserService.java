@@ -40,10 +40,6 @@ public class UserService implements UserDetailsService {
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
     private final PermissionRepository permissionRepository;
-    @Value("${jwt.adminUsername}")
-    private String adminUsername;
-    @Value("${jwt.adminPassword}")
-    private String adminPassword;
 
 
     public List<UserDTO> findAll() {
@@ -140,45 +136,6 @@ public class UserService implements UserDetailsService {
             });
         }
         return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
-    }
-
-    public void createAdminIfNotExists() {
-
-        List<User> admins = userRepository.findByRoles_Name("SUPER_ADMIN");
-        if (admins.size() == 0) {
-            Role adminRole = new Role();
-            adminRole.setName("SUPER_ADMIN");
-            Role admin = roleRepository.findByName("SUPER_ADMIN");
-            List<Permission> allPermissions = permissionRepository.findAll();
-
-            if (admin != null) {
-                adminRole = admin;
-                if (adminRole.getPermissions().size() < allPermissions.size()) {
-                    adminRole.setPermissions(new HashSet<>(allPermissions));
-                    roleRepository.save(adminRole);
-                }
-            } else {
-                adminRole.setPermissions(new HashSet<>(allPermissions));
-                roleRepository.save(adminRole);
-            }
-
-            final User user = userRepository.findByUsername(adminUsername);
-            if (user == null) {
-                final UserDTO userDTO = new UserDTO();
-                userDTO.setUsername(adminUsername);
-                userDTO.setPassword(adminPassword);
-                userDTO.setFirstName("Super");
-                userDTO.setLastName("Admin");
-                userDTO.setIsBanned(false);
-                userDTO.setIsApproved(true);
-                userDTO.setIsTempPassword(true);
-                userDTO.setRoles(new ArrayList<>());
-                userDTO.getRoles().add(roleService.get(adminRole.getId()));
-                create(userDTO);
-            }
-        }
-
-
     }
 
     public Set<Role> getRoles(String username) {
