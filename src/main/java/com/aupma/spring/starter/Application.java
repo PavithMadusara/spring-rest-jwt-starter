@@ -19,4 +19,9 @@ public class Application {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    GrantedAuthorityDefaults grantedAuthorityDefaults() {
+        return new GrantedAuthorityDefaults(""); // Remove the ROLE_ prefix
+    }
+
 }
