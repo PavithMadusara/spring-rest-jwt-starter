@@ -23,7 +23,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -44,7 +43,12 @@ public class UserService implements UserDetailsService {
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
     private final PermissionRepository permissionRepository;
+    private final PermissionService permissionService;
 
+    @Value("${initializer.username}")
+    private String adminUsername;
+    @Value("${initializer.password}")
+    private String adminPassword;
 
     public List<UserDTO> findAll() {
         return userRepository.findAll()
@@ -151,18 +155,53 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username);
     }
 
-    @Component
-    static class RunAfterStartup {
-        public RunAfterStartup(PermissionService permissionService) throws IllegalAccessException {
-            for (Field field : Authorities.class.getFields()) {
-                Object target = new Object();
-                String value = (String) field.get(target);
+    public void syncPermissionToDatabase() throws IllegalAccessException {
+        for (Field field : Authorities.class.getFields()) {
+            Object target = new Object();
+            String value = (String) field.get(target);
 
-                PermissionDTO permissionDTO = new PermissionDTO();
-                permissionDTO.setCode(value);
-                permissionDTO.setDescription(value);
+            PermissionDTO permissionDTO = new PermissionDTO();
+            permissionDTO.setCode(value);
+            permissionDTO.setDescription(value);
 
-                permissionService.create(permissionDTO);
+            permissionService.create(permissionDTO);
+        }
+    }
+
+    public void createAdminIfNotExists() {
+
+        List<User> admins = userRepository.findByRoles_Name("SUPER_ADMIN");
+        if (admins.size() == 0) {
+            Role adminRole = new Role();
+            adminRole.setName("SUPER_ADMIN");
+            adminRole.setLevel(0);
+            Role admin = roleRepository.findByName("SUPER_ADMIN");
+            List<Permission> allPermissions = permissionRepository.findAll();
+
+            if (admin != null) {
+                adminRole = admin;
+                if (adminRole.getPermissions().size() < allPermissions.size()) {
+                    adminRole.setPermissions(new HashSet<>(allPermissions));
+                    roleRepository.save(adminRole);
+                }
+            } else {
+                adminRole.setPermissions(new HashSet<>(allPermissions));
+                roleRepository.save(adminRole);
+            }
+
+            final User user = userRepository.findByUsername(adminUsername);
+            if (user == null) {
+                final UserDTO userDTO = new UserDTO();
+                userDTO.setUsername(adminUsername);
+                userDTO.setPassword(adminPassword);
+                userDTO.setFirstName("Super");
+                userDTO.setLastName("Admin");
+                userDTO.setIsBanned(false);
+                userDTO.setIsApproved(true);
+                userDTO.setIsTempPassword(true);
+                userDTO.setRoles(new ArrayList<>());
+                userDTO.getRoles().add(roleService.get(adminRole.getId()));
+                create(userDTO);
             }
         }
     }

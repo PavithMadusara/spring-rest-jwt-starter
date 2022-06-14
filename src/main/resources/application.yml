@@ -4,6 +4,11 @@ jwt:
   accessTokenLife: ${JWT_ACCESS_TOKEN_LIFE:604800}
   refreshTokenLife: ${JWT_REFRESH_TOKEN_LIFE:2592000}
 
+initializer:
+    enabled: ${INITIALIZER_ENABLED:true}
+    username: ${INITIALIZER_USERNAME:admin@aupma.com}
+    password: ${INITIALIZER_PASSWORD:admin}
+
 spring:
   security:
     filter:
