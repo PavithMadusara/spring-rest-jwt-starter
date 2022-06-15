@@ -6,6 +6,7 @@ import com.aupma.spring.starter.model.AuthResponseDTO;
 import com.aupma.spring.starter.model.TokenRequestDTO;
 import com.aupma.spring.starter.model.UserDTO;
 import com.aupma.spring.starter.service.JwtTokenService;
+import com.aupma.spring.starter.service.TotpService;
 import com.aupma.spring.starter.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -30,6 +31,7 @@ public class AuthResource {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenService tokenService;
     private final UserService userService;
+    private final TotpService totpService;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO authRequest) {
@@ -58,6 +60,24 @@ public class AuthResource {
             return ResponseEntity.ok().body(authResponse);
 
         } catch (BadCredentialsException e) {
+            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
+        }
+    }
+
+    @PostMapping("/verify-mfa")
+    public ResponseEntity<AuthResponseDTO> verifyMfa(Authentication authentication, @RequestParam String code) {
+        User userPrincipal = (User) authentication.getPrincipal();
+        com.aupma.spring.starter.entity.User user = userService.getUser(userPrincipal.getUsername());
+        boolean isVerified = totpService.verifyCode(code, user.getMfaSecret());
+        if (isVerified) {
+            AuthResponseDTO authResponse = new AuthResponseDTO();
+            Set<Role> roles = userService.getRoles(userPrincipal.getUsername());
+            authResponse.setIsMfaRequired(false);
+            authResponse.setAccessToken(tokenService.generateAccessToken(userPrincipal, roles.stream().toList()));
+            authResponse.setRefreshToken(tokenService.generateRefreshToken(userPrincipal));
+            authResponse.setExpiresIn(tokenService.getExpiredDateFromToken(authResponse.getAccessToken()));
+            return ResponseEntity.ok().body(authResponse);
+        } else {
             return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
         }
     }
