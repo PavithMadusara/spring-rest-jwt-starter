@@ -14,6 +14,7 @@ import com.aupma.spring.starter.util.SimplePage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.transaction.Transactional;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -50,6 +52,11 @@ public class UserService implements UserDetailsService {
     private String adminUsername;
     @Value("${initializer.password}")
     private String adminPassword;
+
+    @Bean
+    public Function<UserDetails, User> fetchCurrentUser() {
+        return user -> getUser(user.getUsername());
+    }
 
     public List<UserDTO> findAll() {
         return userRepository.findAll()
