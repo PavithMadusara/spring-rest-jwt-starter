@@ -37,6 +37,18 @@ public class User {
     @Column
     private String mfaSecret;
 
+    @Column(unique = true)
+    private String email;
+
+    @Column(unique = true)
+    private String phone;
+
+    @Column(nullable = false)
+    private Boolean isEmailVerified;
+
+    @Column(nullable = false)
+    private Boolean isPhoneVerified;
+
     @Column
     private Boolean isTempPassword;
 

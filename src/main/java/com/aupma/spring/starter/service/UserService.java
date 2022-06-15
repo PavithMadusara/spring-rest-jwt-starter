@@ -101,6 +101,10 @@ public class UserService implements UserDetailsService {
         userDTO.setUsername(user.getUsername());
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setPhone(user.getPhone());
+        userDTO.setIsEmailVerified(user.getIsEmailVerified());
+        userDTO.setIsPhoneVerified(user.getIsPhoneVerified());
         userDTO.setIsTempPassword(user.getIsTempPassword());
         userDTO.setIsBanned(user.getIsBanned());
         userDTO.setIsMfaEnabled(user.getIsMfaEnabled());
@@ -115,6 +119,10 @@ public class UserService implements UserDetailsService {
         user.setPassword(userDTO.getPassword());
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
+        user.setEmail(userDTO.getEmail());
+        user.setPhone(userDTO.getPhone());
+        user.setIsEmailVerified(userDTO.getIsEmailVerified());
+        user.setIsPhoneVerified(userDTO.getIsPhoneVerified());
         user.setIsTempPassword(userDTO.getIsTempPassword());
         user.setIsMfaEnabled(userDTO.getIsMfaEnabled());
         user.setIsBanned(userDTO.getIsBanned());
