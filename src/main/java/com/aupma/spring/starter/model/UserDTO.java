@@ -36,6 +36,8 @@ public class UserDTO {
 
     private Boolean isPhoneVerified;
 
+    private Boolean isTotpVerified;
+
     private Boolean isTempPassword;
 
     private Boolean isMfaEnabled;

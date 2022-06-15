@@ -81,6 +81,11 @@ public class UserService implements UserDetailsService {
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         final User user = new User();
         mapToEntity(userDTO, user);
+
+        user.setIsTotpVerified(false);
+        user.setIsEmailVerified(false);
+        user.setIsPhoneVerified(false);
+        user.setIsMfaEnabled(false);
         user.setMfaSecret(totpService.generateSecret());
         return mapToDTO(userRepository.save(user), new UserDTO());
     }
@@ -107,6 +112,7 @@ public class UserService implements UserDetailsService {
         userDTO.setIsPhoneVerified(user.getIsPhoneVerified());
         userDTO.setIsTempPassword(user.getIsTempPassword());
         userDTO.setIsBanned(user.getIsBanned());
+        userDTO.setIsTotpVerified(user.getIsTotpVerified());
         userDTO.setIsMfaEnabled(user.getIsMfaEnabled());
         userDTO.setIsApproved(user.getIsApproved());
         userDTO.setRoles(user.getRoles() == null ? null : user.getRoles().stream()
@@ -124,6 +130,7 @@ public class UserService implements UserDetailsService {
         user.setIsEmailVerified(userDTO.getIsEmailVerified());
         user.setIsPhoneVerified(userDTO.getIsPhoneVerified());
         user.setIsTempPassword(userDTO.getIsTempPassword());
+        user.setIsTotpVerified(userDTO.getIsTotpVerified());
         user.setIsMfaEnabled(userDTO.getIsMfaEnabled());
         user.setIsBanned(userDTO.getIsBanned());
         user.setIsApproved(userDTO.getIsApproved());
@@ -209,10 +216,6 @@ public class UserService implements UserDetailsService {
                 userDTO.setFirstName("Super");
                 userDTO.setLastName("Admin");
                 userDTO.setEmail(adminUsername);
-                userDTO.setIsMfaEnabled(false);
-                userDTO.setIsEmailVerified(true);
-                userDTO.setIsPhoneVerified(false);
-                userDTO.setIsTotpVerified(false);
                 userDTO.setIsBanned(false);
                 userDTO.setIsApproved(true);
                 userDTO.setIsTempPassword(true);

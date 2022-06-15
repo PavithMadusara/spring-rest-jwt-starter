@@ -49,6 +49,9 @@ public class User {
     @Column(nullable = false)
     private Boolean isPhoneVerified;
 
+    @Column(nullable = false)
+    private Boolean isTotpVerified;
+
     @Column
     private Boolean isTempPassword;
 
