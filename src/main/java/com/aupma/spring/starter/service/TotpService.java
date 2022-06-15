@@ -14,6 +14,7 @@ import dev.samstevens.totp.secret.SecretGenerator;
 import dev.samstevens.totp.time.SystemTimeProvider;
 import dev.samstevens.totp.time.TimeProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import static dev.samstevens.totp.util.Utils.getDataUriForImage;
@@ -21,6 +22,13 @@ import static dev.samstevens.totp.util.Utils.getDataUriForImage;
 @Slf4j
 @Service
 public class TotpService {
+
+    @Value("${totp.qrLabel}")
+    private String qrLabel;
+    @Value("${totp.issuer}")
+    private String issuer;
+
+
     public String generateSecret() {
         SecretGenerator generator = new DefaultSecretGenerator();
         return generator.generate();
@@ -28,9 +36,9 @@ public class TotpService {
 
     public String getUriForImage(String secret) {
         QrData data = new QrData.Builder()
-                .label("Two-factor-auth-test")
+                .label(qrLabel)
                 .secret(secret)
-                .issuer("exampleTwoFactor")
+                .issuer(issuer)
                 .algorithm(HashingAlgorithm.SHA1)
                 .digits(6)
                 .period(30)
