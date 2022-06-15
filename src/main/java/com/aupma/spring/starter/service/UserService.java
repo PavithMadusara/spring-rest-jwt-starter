@@ -101,6 +101,7 @@ public class UserService implements UserDetailsService {
         userDTO.setLastName(user.getLastName());
         userDTO.setIsTempPassword(user.getIsTempPassword());
         userDTO.setIsBanned(user.getIsBanned());
+        userDTO.setIsMfaEnabled(user.getIsMfaEnabled());
         userDTO.setIsApproved(user.getIsApproved());
         userDTO.setRoles(user.getRoles() == null ? null : user.getRoles().stream()
                 .map(role -> roleService.mapToDTO(role, new RoleDTO())).collect(Collectors.toList()));
@@ -113,6 +114,7 @@ public class UserService implements UserDetailsService {
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setIsTempPassword(userDTO.getIsTempPassword());
+        user.setIsMfaEnabled(userDTO.getIsMfaEnabled());
         user.setIsBanned(userDTO.getIsBanned());
         user.setIsApproved(userDTO.getIsApproved());
         if (userDTO.getRoles() != null) {

@@ -35,7 +35,13 @@ public class User {
     private String lastName;
 
     @Column
+    private String mfaSecret;
+
+    @Column
     private Boolean isTempPassword;
+
+    @Column
+    private Boolean isMfaEnabled;
 
     @Column
     private Boolean isBanned;

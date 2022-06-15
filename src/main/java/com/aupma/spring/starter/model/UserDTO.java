@@ -30,6 +30,8 @@ public class UserDTO {
 
     private Boolean isTempPassword;
 
+    private Boolean isMfaEnabled;
+
     private Boolean isBanned;
 
     private Boolean isApproved;
