@@ -217,4 +217,9 @@ public class UserService implements UserDetailsService {
             }
         }
     }
+
+    public boolean getIsMfaEnabled(String username) {
+        User user = userRepository.findByUsername(username);
+        return user.getIsMfaEnabled();
+    }
 }
