@@ -208,6 +208,11 @@ public class UserService implements UserDetailsService {
                 userDTO.setPassword(adminPassword);
                 userDTO.setFirstName("Super");
                 userDTO.setLastName("Admin");
+                userDTO.setEmail(adminUsername);
+                userDTO.setIsMfaEnabled(false);
+                userDTO.setIsEmailVerified(true);
+                userDTO.setIsPhoneVerified(false);
+                userDTO.setIsTotpVerified(false);
                 userDTO.setIsBanned(false);
                 userDTO.setIsApproved(true);
                 userDTO.setIsTempPassword(true);
