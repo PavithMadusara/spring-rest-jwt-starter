@@ -70,22 +70,6 @@ public class AuthResource {
         return ResponseEntity.ok(totpService.getUriForImage(user.getMfaSecret()));
     }
 
-    @PostMapping("/verify-phone")
-    public ResponseEntity<Void> verifyPhone(@RequestBody MfaRequestDTO mfaRequest, @CurrentUser com.aupma.spring.starter.entity.User user) {
-        boolean matches = passwordEncoder.matches(mfaRequest.getPassword(), user.getPassword());
-        if (matches) {
-            boolean verified = totpService.verifyCode(mfaRequest.getCode(), user.getMfaSecret());
-            if (verified) {
-                userService.enablePhone(user.getUsername());
-                return ResponseEntity.ok().build();
-            } else {
-                return ResponseEntity.status(HttpServletResponse.SC_FORBIDDEN).build();
-            }
-        } else {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).build();
-        }
-    }
-
     @PostMapping("/verify-totp")
     public ResponseEntity<Void> verifyTotp(@RequestBody MfaRequestDTO mfaRequest, @CurrentUser com.aupma.spring.starter.entity.User user) {
         boolean matches = passwordEncoder.matches(mfaRequest.getPassword(), user.getPassword());
