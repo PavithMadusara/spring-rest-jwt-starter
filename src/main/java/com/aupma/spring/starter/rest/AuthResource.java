@@ -19,10 +19,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.Set;
 
 @RestController
-@RequestMapping(value = "/api/auth",produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/auth", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class AuthResource {
 
@@ -36,11 +37,22 @@ public class AuthResource {
             Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
 
             User user = (User) authenticate.getPrincipal();
-            Set<Role> roles = userService.getRoles(user.getUsername());
 
             AuthResponseDTO authResponse = new AuthResponseDTO();
-            authResponse.setAccessToken(tokenService.generateAccessToken(user, roles.stream().toList()));
-            authResponse.setRefreshToken(tokenService.generateRefreshToken(user));
+
+            boolean isMfaEnabled = userService.getIsMfaEnabled(user.getUsername());
+
+            if (isMfaEnabled) {
+                authResponse.setIsMfaRequired(true);
+                // Generating access token without any roles, this can be only used for MFA verification request
+                authResponse.setAccessToken(tokenService.generateAccessToken(user, new ArrayList<>()));
+            } else {
+                Set<Role> roles = userService.getRoles(user.getUsername());
+                authResponse.setIsMfaRequired(false);
+                authResponse.setAccessToken(tokenService.generateAccessToken(user, roles.stream().toList()));
+                authResponse.setRefreshToken(tokenService.generateRefreshToken(user));
+            }
+
             authResponse.setExpiresIn(tokenService.getExpiredDateFromToken(authResponse.getAccessToken()));
 
             return ResponseEntity.ok().body(authResponse);
