@@ -8,6 +8,7 @@ import com.aupma.spring.starter.model.UserDTO;
 import com.aupma.spring.starter.service.JwtTokenService;
 import com.aupma.spring.starter.service.TotpService;
 import com.aupma.spring.starter.service.UserService;
+import com.aupma.spring.starter.util.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -64,6 +65,11 @@ public class AuthResource {
         }
     }
 
+    @GetMapping("/totp-qr-code")
+    public ResponseEntity<String> getTotpQrCode(@CurrentUser com.aupma.spring.starter.entity.User user) {
+        return ResponseEntity.ok(totpService.getUriForImage(user.getMfaSecret()));
+    }
+
     @PostMapping("/verify-mfa")
     public ResponseEntity<AuthResponseDTO> verifyMfa(Authentication authentication, @RequestParam String code) {
         User userPrincipal = (User) authentication.getPrincipal();
@@ -83,10 +89,7 @@ public class AuthResource {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDTO> getCurrentUser(@RequestHeader("Authorization") String token) {
-        String bearerToken = token.substring(7);
-        String username = tokenService.getUserNameFromToken(bearerToken);
-        com.aupma.spring.starter.entity.User user = userService.getUser(username);
+    public ResponseEntity<UserDTO> getCurrentUser(@CurrentUser com.aupma.spring.starter.entity.User user) {
         return ResponseEntity.ok().body(userService.mapToDTO(user, new UserDTO()));
     }
 
