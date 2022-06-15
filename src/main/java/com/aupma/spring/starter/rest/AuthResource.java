@@ -1,10 +1,7 @@
 package com.aupma.spring.starter.rest;
 
 import com.aupma.spring.starter.entity.Role;
-import com.aupma.spring.starter.model.AuthRequestDTO;
-import com.aupma.spring.starter.model.AuthResponseDTO;
-import com.aupma.spring.starter.model.TokenRequestDTO;
-import com.aupma.spring.starter.model.UserDTO;
+import com.aupma.spring.starter.model.*;
 import com.aupma.spring.starter.service.JwtTokenService;
 import com.aupma.spring.starter.service.TotpService;
 import com.aupma.spring.starter.service.UserService;
@@ -18,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -33,6 +31,8 @@ public class AuthResource {
     private final JwtTokenService tokenService;
     private final UserService userService;
     private final TotpService totpService;
+    private final PasswordEncoder passwordEncoder;
+
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthRequestDTO authRequest) {
@@ -68,6 +68,38 @@ public class AuthResource {
     @GetMapping(value = "/totp-qr-code", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> getTotpQrCode(@CurrentUser com.aupma.spring.starter.entity.User user) {
         return ResponseEntity.ok(totpService.getUriForImage(user.getMfaSecret()));
+    }
+
+    @PostMapping("/verify-phone")
+    public ResponseEntity<Void> verifyPhone(@RequestBody MfaRequestDTO mfaRequest, @CurrentUser com.aupma.spring.starter.entity.User user) {
+        boolean matches = passwordEncoder.matches(mfaRequest.getPassword(), user.getPassword());
+        if (matches) {
+            boolean verified = totpService.verifyCode(mfaRequest.getCode(), user.getMfaSecret());
+            if (verified) {
+                userService.enablePhone(user.getUsername());
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpServletResponse.SC_FORBIDDEN).build();
+            }
+        } else {
+            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).build();
+        }
+    }
+
+    @PostMapping("/verify-totp")
+    public ResponseEntity<Void> verifyTotp(@RequestBody MfaRequestDTO mfaRequest, @CurrentUser com.aupma.spring.starter.entity.User user) {
+        boolean matches = passwordEncoder.matches(mfaRequest.getPassword(), user.getPassword());
+        if (matches) {
+            boolean verified = totpService.verifyCode(mfaRequest.getCode(), user.getMfaSecret());
+            if (verified) {
+                userService.enableTotp(user.getUsername());
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpServletResponse.SC_FORBIDDEN).build();
+            }
+        } else {
+            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).build();
+        }
     }
 
     @PostMapping("/verify-mfa")

@@ -237,4 +237,18 @@ public class UserService implements UserDetailsService {
         User user = userRepository.findByUsername(username);
         return user.getIsMfaEnabled();
     }
+
+    public void enableTotp(String username) {
+        User user = userRepository.findByUsername(username);
+        user.setIsMfaEnabled(true);
+        user.setIsTotpVerified(true);
+        userRepository.save(user);
+    }
+
+    public void enablePhone(String username) {
+        User user = userRepository.findByUsername(username);
+        user.setIsMfaEnabled(true);
+        user.setIsPhoneVerified(true);
+        userRepository.save(user);
+    }
 }
