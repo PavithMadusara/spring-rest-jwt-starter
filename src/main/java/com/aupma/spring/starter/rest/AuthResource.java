@@ -86,7 +86,7 @@ public class AuthResource {
         }
     }
 
-    @PostMapping("/verify-mfa")
+    @PostMapping("login/verify-totp")
     public ResponseEntity<AuthResponseDTO> verifyMfa(Authentication authentication, @RequestParam String code) {
         User userPrincipal = (User) authentication.getPrincipal();
         com.aupma.spring.starter.entity.User user = userService.getUser(userPrincipal.getUsername());
