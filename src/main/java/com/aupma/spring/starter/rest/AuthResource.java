@@ -65,7 +65,7 @@ public class AuthResource {
         }
     }
 
-    @GetMapping("/totp-qr-code")
+    @GetMapping(value = "/totp-qr-code", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> getTotpQrCode(@CurrentUser com.aupma.spring.starter.entity.User user) {
         return ResponseEntity.ok(totpService.getUriForImage(user.getMfaSecret()));
     }
