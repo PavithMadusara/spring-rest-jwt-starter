@@ -49,16 +49,13 @@ public class AuthResource {
                 authResponse.setIsMfaRequired(true);
                 // Generating access token without any roles, this can be only used for MFA verification request
                 authResponse.setAccessToken(tokenService.generateAccessToken(user, new ArrayList<>()));
+                authResponse.setExpiresIn(tokenService.getExpiredDateFromToken(authResponse.getAccessToken()));
+                return ResponseEntity.ok().body(authResponse);
             } else {
                 Set<Role> roles = userService.getRoles(user.getUsername());
-                authResponse.setIsMfaRequired(false);
-                authResponse.setAccessToken(tokenService.generateAccessToken(user, roles.stream().toList()));
-                authResponse.setRefreshToken(tokenService.generateRefreshToken(user));
+                return ResponseEntity.ok().body(generateAuthResponse(user, roles));
             }
 
-            authResponse.setExpiresIn(tokenService.getExpiredDateFromToken(authResponse.getAccessToken()));
-
-            return ResponseEntity.ok().body(authResponse);
 
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
@@ -92,13 +89,8 @@ public class AuthResource {
         com.aupma.spring.starter.entity.User user = userService.getUser(userPrincipal.getUsername());
         boolean isVerified = totpService.verifyCode(code, user.getMfaSecret());
         if (isVerified) {
-            AuthResponseDTO authResponse = new AuthResponseDTO();
             Set<Role> roles = userService.getRoles(userPrincipal.getUsername());
-            authResponse.setIsMfaRequired(false);
-            authResponse.setAccessToken(tokenService.generateAccessToken(userPrincipal, roles.stream().toList()));
-            authResponse.setRefreshToken(tokenService.generateRefreshToken(userPrincipal));
-            authResponse.setExpiresIn(tokenService.getExpiredDateFromToken(authResponse.getAccessToken()));
-            return ResponseEntity.ok().body(authResponse);
+            return ResponseEntity.ok().body(generateAuthResponse(userPrincipal, roles));
         } else {
             return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
         }
@@ -115,14 +107,17 @@ public class AuthResource {
         Set<Role> roles = userService.getRoles(userDetails.getUsername());
         boolean isValidToken = tokenService.validateToken(requestDTO.getRefreshToken(), userDetails);
         if (isValidToken) {
-            String newAccessToken = tokenService.generateAccessToken(userDetails, roles.stream().toList());
-            AuthResponseDTO authResponse = new AuthResponseDTO();
-            authResponse.setAccessToken(newAccessToken);
-            authResponse.setRefreshToken(requestDTO.getRefreshToken());
-            authResponse.setExpiresIn(tokenService.getExpiredDateFromToken(newAccessToken));
-            return ResponseEntity.ok().body(authResponse);
+            return ResponseEntity.ok().body(generateAuthResponse(userDetails, roles));
         } else {
             return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
         }
+    }
+
+    private AuthResponseDTO generateAuthResponse(UserDetails userDetails, Set<Role> roles) {
+        AuthResponseDTO authResponse = new AuthResponseDTO();
+        authResponse.setAccessToken(tokenService.generateAccessToken(userDetails, roles.stream().toList()));
+        authResponse.setRefreshToken(tokenService.generateRefreshToken(userDetails));
+        authResponse.setExpiresIn(tokenService.getExpiredDateFromToken(authResponse.getAccessToken()));
+        return authResponse;
     }
 }
