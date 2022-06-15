@@ -44,6 +44,7 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final PermissionRepository permissionRepository;
     private final PermissionService permissionService;
+    private final TotpService totpService;
 
     @Value("${initializer.username}")
     private String adminUsername;
@@ -80,6 +81,7 @@ public class UserService implements UserDetailsService {
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         final User user = new User();
         mapToEntity(userDTO, user);
+        user.setMfaSecret(totpService.generateSecret());
         return mapToDTO(userRepository.save(user), new UserDTO());
     }
 
