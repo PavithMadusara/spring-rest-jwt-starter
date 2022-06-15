@@ -35,7 +35,28 @@ public class User {
     private String lastName;
 
     @Column
+    private String mfaSecret;
+
+    @Column(unique = true)
+    private String email;
+
+    @Column(unique = true)
+    private String phone;
+
+    @Column(nullable = false)
+    private Boolean isEmailVerified;
+
+    @Column(nullable = false)
+    private Boolean isPhoneVerified;
+
+    @Column(nullable = false)
+    private Boolean isTotpVerified;
+
+    @Column
     private Boolean isTempPassword;
+
+    @Column
+    private Boolean isMfaEnabled;
 
     @Column
     private Boolean isBanned;
@@ -50,6 +71,9 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles;
+
+    @OneToMany(mappedBy = "user")
+    private Set<VerificationCode> verificationCodes;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)

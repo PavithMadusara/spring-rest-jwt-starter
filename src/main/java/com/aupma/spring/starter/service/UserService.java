@@ -14,6 +14,7 @@ import com.aupma.spring.starter.util.SimplePage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.transaction.Transactional;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -44,11 +46,17 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final PermissionRepository permissionRepository;
     private final PermissionService permissionService;
+    private final TotpService totpService;
 
     @Value("${initializer.username}")
     private String adminUsername;
     @Value("${initializer.password}")
     private String adminPassword;
+
+    @Bean
+    public Function<UserDetails, User> fetchCurrentUser() {
+        return user -> getUser(user.getUsername());
+    }
 
     public List<UserDTO> findAll() {
         return userRepository.findAll()
@@ -80,6 +88,12 @@ public class UserService implements UserDetailsService {
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         final User user = new User();
         mapToEntity(userDTO, user);
+
+        user.setIsTotpVerified(false);
+        user.setIsEmailVerified(false);
+        user.setIsPhoneVerified(false);
+        user.setIsMfaEnabled(false);
+        user.setMfaSecret(totpService.generateSecret());
         return mapToDTO(userRepository.save(user), new UserDTO());
     }
 
@@ -99,8 +113,14 @@ public class UserService implements UserDetailsService {
         userDTO.setUsername(user.getUsername());
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setPhone(user.getPhone());
+        userDTO.setIsEmailVerified(user.getIsEmailVerified());
+        userDTO.setIsPhoneVerified(user.getIsPhoneVerified());
         userDTO.setIsTempPassword(user.getIsTempPassword());
         userDTO.setIsBanned(user.getIsBanned());
+        userDTO.setIsTotpVerified(user.getIsTotpVerified());
+        userDTO.setIsMfaEnabled(user.getIsMfaEnabled());
         userDTO.setIsApproved(user.getIsApproved());
         userDTO.setRoles(user.getRoles() == null ? null : user.getRoles().stream()
                 .map(role -> roleService.mapToDTO(role, new RoleDTO())).collect(Collectors.toList()));
@@ -112,7 +132,13 @@ public class UserService implements UserDetailsService {
         user.setPassword(userDTO.getPassword());
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
+        user.setEmail(userDTO.getEmail());
+        user.setPhone(userDTO.getPhone());
+        user.setIsEmailVerified(userDTO.getIsEmailVerified());
+        user.setIsPhoneVerified(userDTO.getIsPhoneVerified());
         user.setIsTempPassword(userDTO.getIsTempPassword());
+        user.setIsTotpVerified(userDTO.getIsTotpVerified());
+        user.setIsMfaEnabled(userDTO.getIsMfaEnabled());
         user.setIsBanned(userDTO.getIsBanned());
         user.setIsApproved(userDTO.getIsApproved());
         if (userDTO.getRoles() != null) {
@@ -196,6 +222,7 @@ public class UserService implements UserDetailsService {
                 userDTO.setPassword(adminPassword);
                 userDTO.setFirstName("Super");
                 userDTO.setLastName("Admin");
+                userDTO.setEmail(adminUsername);
                 userDTO.setIsBanned(false);
                 userDTO.setIsApproved(true);
                 userDTO.setIsTempPassword(true);
@@ -204,5 +231,24 @@ public class UserService implements UserDetailsService {
                 create(userDTO);
             }
         }
+    }
+
+    public boolean getIsMfaEnabled(String username) {
+        User user = userRepository.findByUsername(username);
+        return user.getIsMfaEnabled();
+    }
+
+    public void enableTotp(String username) {
+        User user = userRepository.findByUsername(username);
+        user.setIsMfaEnabled(true);
+        user.setIsTotpVerified(true);
+        userRepository.save(user);
+    }
+
+    public void enablePhone(String username) {
+        User user = userRepository.findByUsername(username);
+        user.setIsMfaEnabled(true);
+        user.setIsPhoneVerified(true);
+        userRepository.save(user);
     }
 }

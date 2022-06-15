@@ -28,7 +28,19 @@ public class UserDTO {
     @Size(max = 255)
     private String lastName;
 
+    private String email;
+
+    private String phone;
+
+    private Boolean isEmailVerified;
+
+    private Boolean isPhoneVerified;
+
+    private Boolean isTotpVerified;
+
     private Boolean isTempPassword;
+
+    private Boolean isMfaEnabled;
 
     private Boolean isBanned;
 

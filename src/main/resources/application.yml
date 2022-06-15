@@ -9,6 +9,10 @@ initializer:
     username: ${INITIALIZER_USERNAME:admin@aupma.com}
     password: ${INITIALIZER_PASSWORD:admin}
 
+totp:
+  qrLabel: ${TOTP_QR_LABEL:AUPMA}
+  issuer: ${TOTP_ISSUER:aupma.com}
+
 spring:
   security:
     filter:
