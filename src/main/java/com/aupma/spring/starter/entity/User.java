@@ -72,6 +72,9 @@ public class User {
     )
     private Set<Role> roles;
 
+    @OneToMany(mappedBy = "user")
+    private Set<VerificationCode> verificationCodes;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private OffsetDateTime dateCreated;
