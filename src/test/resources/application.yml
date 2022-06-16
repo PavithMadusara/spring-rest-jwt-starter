@@ -1,0 +1,28 @@
+jwt:
+  header: Authorization
+  secret: ${JWT_SECRET:jwt-secret}
+  accessTokenLife: ${JWT_ACCESS_TOKEN_LIFE:604800}
+  refreshTokenLife: ${JWT_REFRESH_TOKEN_LIFE:2592000}
+
+initializer:
+  enabled: ${INITIALIZER_ENABLED:false}
+  username: ${INITIALIZER_USERNAME:admin@aupma.com}
+  password: ${INITIALIZER_PASSWORD:admin}
+
+totp:
+  qrLabel: ${TOTP_QR_LABEL:AUPMA}
+  issuer: ${TOTP_ISSUER:aupma.com}
+
+spring:
+  datasource:
+    url: ${JDBC_DATABASE_URL:jdbc:h2:mem:db;DB_CLOSE_DELAY=-1}
+    username: ${JDBC_DATABASE_USERNAME:sa}
+    password: ${JDBC_DATABASE_PASSWORD:sa}
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:create-drop}
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
