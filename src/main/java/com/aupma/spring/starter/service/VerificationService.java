@@ -65,4 +65,10 @@ public class VerificationService {
 
         System.out.println("Sending password reset link: " + verificationCodeDTO.getCode() + " to user: " + userId);
     }
+
+    public Boolean verifyResetToken(Long id, String token) {
+        VerificationCodeDTO codeDTO = verificationCodeService.get(id, VerificationType.PASSWORD_RESET, token);
+        verificationCodeService.delete(codeDTO.getId());
+        return true;
+    }
 }
