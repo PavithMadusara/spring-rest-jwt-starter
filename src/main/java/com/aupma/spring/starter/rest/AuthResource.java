@@ -16,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -32,6 +33,7 @@ public class AuthResource {
     private final UserService userService;
     private final TotpService totpService;
     private final VerificationService verificationService;
+    private final PasswordEncoder passwordEncoder;
 
 
     @PostMapping("/login")
@@ -62,6 +64,40 @@ public class AuthResource {
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
         }
+    }
+
+    @GetMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestParam String username) {
+        com.aupma.spring.starter.entity.User user = userService.getUser(username);
+        if (user == null) {
+            return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).body(null);
+        }
+        verificationService.sendPasswordResetLink(user.getId());
+        return ResponseEntity.ok().body(null);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
+        com.aupma.spring.starter.entity.User user = userService.getUser(resetPasswordDTO.getUsername());
+        if (user == null) {
+            return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).body(null);
+        }
+        Boolean verified = verificationService.verifyResetToken(user.getId(), resetPasswordDTO.getToken());
+        if (!verified) {
+            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
+        }
+        userService.updatePassword(user.getId(), resetPasswordDTO.getPassword());
+        return ResponseEntity.ok().body(null);
+    }
+
+    @PostMapping("/update-password")
+    public ResponseEntity<Void> updatePassword(@RequestBody UpdatePasswordDTO updatePasswordDTO, @CurrentUser com.aupma.spring.starter.entity.User user) {
+        boolean matches = passwordEncoder.matches(updatePasswordDTO.getOldPassword(), user.getPassword());
+        if (!matches) {
+            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
+        }
+        userService.updatePassword(user.getId(), updatePasswordDTO.getNewPassword());
+        return ResponseEntity.ok().body(null);
     }
 
     @PostMapping(value = "/get-code", produces = MediaType.TEXT_PLAIN_VALUE)
