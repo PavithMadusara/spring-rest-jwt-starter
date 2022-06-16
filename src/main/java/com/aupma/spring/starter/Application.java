@@ -1,6 +1,6 @@
 package com.aupma.spring.starter;
 
-import com.aupma.spring.starter.service.UserService;
+import com.aupma.spring.starter.security.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
