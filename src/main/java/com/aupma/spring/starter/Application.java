@@ -19,19 +19,8 @@ public class Application {
         SpringApplication.run(Application.class, args);
     }
 
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    GrantedAuthorityDefaults grantedAuthorityDefaults() {
-        return new GrantedAuthorityDefaults(""); // Remove the ROLE_ prefix
-    }
-
     @Component
     public static class AppStartupRunner implements CommandLineRunner {
-
         @Autowired
         private UserService userService;
         @Value("${initializer.enabled}")
