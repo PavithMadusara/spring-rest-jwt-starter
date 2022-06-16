@@ -19,20 +19,4 @@ public class Application {
         SpringApplication.run(Application.class, args);
     }
 
-    @Component
-    public static class AppStartupRunner implements CommandLineRunner {
-        @Autowired
-        private UserService userService;
-        @Value("${initializer.enabled}")
-        private boolean initializerEnabled;
-
-        @Override
-        public void run(String... args) throws Exception {
-            userService.syncPermissionToDatabase();
-            if (initializerEnabled) {
-                userService.createAdminIfNotExists();
-            }
-        }
-    }
-
 }
