@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: ${JDBC_DATABASE_URL:jdbc:h2://mem:spring-jwt-rest-starter;DB_CLOSE_DELAY=-1}
+    username: ${JDBC_DATABASE_USERNAME:aupma}
+    password: ${JDBC_DATABASE_PASSWORD:aupma}
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:create-drop}
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
