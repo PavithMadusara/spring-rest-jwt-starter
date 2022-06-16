@@ -37,6 +37,7 @@ public class RoleService {
                 .collect(Collectors.toList()),
                 page.getTotalElements(), pageable);
     }
+
     public List<RoleDTO> findAll() {
         return roleRepository.findAll().stream().map(role -> mapToDTO(role, new RoleDTO()))
                 .collect(Collectors.toList());

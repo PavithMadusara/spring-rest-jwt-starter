@@ -12,5 +12,6 @@ import java.lang.annotation.RetentionPolicy;
 @Inherited
 @Documented
 @Parameter(hidden = true)
-@AuthenticationPrincipal(expression = "@fetchCurrentUser.apply(#this)", errorOnInvalidType=true)
-public @interface CurrentUser {}
+@AuthenticationPrincipal(expression = "@fetchCurrentUser.apply(#this)", errorOnInvalidType = true)
+public @interface CurrentUser {
+}
