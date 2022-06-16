@@ -251,4 +251,11 @@ public class UserService implements UserDetailsService {
         user.setIsPhoneVerified(true);
         userRepository.save(user);
     }
+
+    public void updatePassword(Long id, String newPassword) {
+        userRepository.findById(id).ifPresent(user -> {
+            user.setPassword(newPassword);
+            userRepository.save(user);
+        });
+    }
 }
