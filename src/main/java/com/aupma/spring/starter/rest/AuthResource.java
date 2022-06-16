@@ -64,6 +64,16 @@ public class AuthResource {
         }
     }
 
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestParam String username) {
+        com.aupma.spring.starter.entity.User user = userService.getUser(username);
+        if (user == null) {
+            return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).body(null);
+        }
+        verificationService.sendPasswordResetLink(user.getId());
+        return ResponseEntity.ok().body(null);
+    }
+
     @PostMapping(value = "/get-code", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> sendCode(
             @CurrentUser com.aupma.spring.starter.entity.User user,
