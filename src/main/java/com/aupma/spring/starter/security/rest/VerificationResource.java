@@ -1,6 +1,7 @@
 package com.aupma.spring.starter.security.rest;
 
 import com.aupma.spring.starter.security.entity.User;
+import com.aupma.spring.starter.security.exception.ApplicationSecurityException;
 import com.aupma.spring.starter.security.model.MfaRequestDTO;
 import com.aupma.spring.starter.security.model.VerificationType;
 import com.aupma.spring.starter.security.service.TotpService;
@@ -8,6 +9,7 @@ import com.aupma.spring.starter.security.service.UserService;
 import com.aupma.spring.starter.security.service.VerificationService;
 import com.aupma.spring.starter.security.util.CurrentUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -78,24 +80,27 @@ public class VerificationResource {
         }
     }
 
-    @PostMapping(value = "/get-code", produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(value = "/get-qr-code", produces = MediaType.TEXT_PLAIN_VALUE)
+    public ResponseEntity<String> getTOTPQrCode(@CurrentUser User user) {
+        return ResponseEntity.ok(totpService.getUriForImage(user.getMfaSecret()));
+    }
+
+    @PostMapping(value = "/get-code")
     public ResponseEntity<String> sendCode(@CurrentUser User user, @RequestParam VerificationType type) {
         switch (type) {
-            case TOTP:
-                return ResponseEntity.ok(totpService.getUriForImage(user.getMfaSecret()));
             case PHONE:
                 if (user.getPhone() != null) {
                     verificationService.sendOTPCode(user.getPhone(), user.getId());
                     return ResponseEntity.ok().build();
                 } else {
-                    return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).build();
+                    throw new ApplicationSecurityException(HttpStatus.NOT_FOUND, "PHONE_NUMBER_NOT_FOUND", "Phone number is not available");
                 }
             case EMAIL:
                 if (user.getEmail() != null) {
                     verificationService.sendEmailCode(user.getEmail(), user.getId());
                     return ResponseEntity.ok().build();
                 } else {
-                    return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).build();
+                    throw new ApplicationSecurityException(HttpStatus.NOT_FOUND, "EMAIL_NOT_FOUND", "Email is not available");
                 }
         }
         return ResponseEntity.ok().build();

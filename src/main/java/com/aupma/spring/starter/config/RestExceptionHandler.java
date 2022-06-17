@@ -21,8 +21,8 @@ import java.util.stream.Collectors;
 @RestControllerAdvice(annotations = RestController.class)
 public class RestExceptionHandler extends SecurityExceptionHandler {
 
-    @ExceptionHandler(ApplicationSecurityException.class)
-    @ApiResponse(responseCode = "401/403", description = "Security Error")
+    @ExceptionHandler({ApplicationSecurityException.class})
+    @ApiResponse(responseCode = "4xx", description = "Security Error")
     public ResponseEntity<ErrorResponse> handleNotFound(final ApplicationSecurityException exception) {
         final ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setHttpStatus(exception.getStatus().value());

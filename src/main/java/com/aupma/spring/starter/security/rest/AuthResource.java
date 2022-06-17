@@ -1,6 +1,7 @@
 package com.aupma.spring.starter.security.rest;
 
 import com.aupma.spring.starter.security.entity.Role;
+import com.aupma.spring.starter.security.exception.ApplicationSecurityException;
 import com.aupma.spring.starter.security.model.*;
 import com.aupma.spring.starter.security.service.JwtTokenService;
 import com.aupma.spring.starter.security.service.TotpService;
@@ -8,6 +9,7 @@ import com.aupma.spring.starter.security.service.UserService;
 import com.aupma.spring.starter.security.service.VerificationService;
 import com.aupma.spring.starter.security.util.CurrentUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -60,9 +62,8 @@ public class AuthResource {
                 return ResponseEntity.ok().body(generateAuthResponse(user, roles));
             }
 
-
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
+            throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED, "BAD_CREDENTIALS", "Invalid username or password");
         }
     }
 
@@ -138,7 +139,7 @@ public class AuthResource {
             Set<Role> roles = userService.getRoles(userDetails.getUsername());
             return ResponseEntity.ok().body(generateAuthResponse(userDetails, roles));
         } else {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).build();
+            throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED, "INVALID_TOTP_CODE", "Invalid code");
         }
     }
 

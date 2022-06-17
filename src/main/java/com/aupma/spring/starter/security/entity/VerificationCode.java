@@ -43,4 +43,14 @@ public class VerificationCode {
     @Column(nullable = false)
     private OffsetDateTime lastUpdated;
 
+    @PrePersist
+    public void onCreate() {
+        dateCreated = lastUpdated = OffsetDateTime.now();
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        lastUpdated = OffsetDateTime.now();
+    }
+
 }
