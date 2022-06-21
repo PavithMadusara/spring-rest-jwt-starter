@@ -18,6 +18,7 @@ public class StartupRunner implements CommandLineRunner {
         userService.syncPermissionToDatabase();
         if (initializerEnabled) {
             userService.createAdminIfNotExists();
+            userService.syncPermissionToSuperAdmin();
         }
     }
 }

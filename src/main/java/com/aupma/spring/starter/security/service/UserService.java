@@ -194,6 +194,15 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    public void syncPermissionToSuperAdmin() {
+        Role superAdmin = roleRepository.findByName("SUPER_ADMIN");
+        if (superAdmin != null) {
+            List<Permission> allPermissions = permissionRepository.findAll();
+            superAdmin.setPermissions(new HashSet<>(allPermissions));
+            roleRepository.save(superAdmin);
+        }
+    }
+
     public void createAdminIfNotExists() {
 
         List<User> admins = userRepository.findByRoles_Name("SUPER_ADMIN");
