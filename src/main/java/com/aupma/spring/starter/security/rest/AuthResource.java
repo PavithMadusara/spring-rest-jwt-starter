@@ -71,7 +71,7 @@ public class AuthResource {
     public ResponseEntity<Void> resetPassword(@RequestParam String username) {
         com.aupma.spring.starter.security.entity.User user = userService.getUser(username);
         if (user == null) {
-            return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).body(null);
+            throw new ApplicationSecurityException(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "User not found");
         }
         verificationService.sendPasswordResetLink(user.getId());
         return ResponseEntity.ok().body(null);
@@ -81,11 +81,11 @@ public class AuthResource {
     public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
         com.aupma.spring.starter.security.entity.User user = userService.getUser(resetPasswordDTO.getUsername());
         if (user == null) {
-            return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).body(null);
+            throw new ApplicationSecurityException(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "User not found");
         }
         Boolean verified = verificationService.verifyResetToken(user.getId(), resetPasswordDTO.getToken());
         if (!verified) {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
+            throw new ApplicationSecurityException(HttpStatus.BAD_REQUEST, "INVALID_TOKEN", "Invalid token");
         }
         userService.updatePassword(user.getId(), resetPasswordDTO.getPassword());
         return ResponseEntity.ok().body(null);
@@ -95,7 +95,7 @@ public class AuthResource {
     public ResponseEntity<Void> updatePassword(@RequestBody UpdatePasswordDTO updatePasswordDTO, @CurrentUser com.aupma.spring.starter.security.entity.User user) {
         boolean matches = passwordEncoder.matches(updatePasswordDTO.getOldPassword(), user.getPassword());
         if (!matches) {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
+            throw new ApplicationSecurityException(HttpStatus.BAD_REQUEST, "INVALID_PASSWORD", "Invalid password");
         }
         userService.updatePassword(user.getId(), updatePasswordDTO.getNewPassword());
         return ResponseEntity.ok().body(null);
@@ -114,14 +114,14 @@ public class AuthResource {
                     verificationService.sendOTPCode(user.getPhone(), user.getId());
                     return ResponseEntity.ok().build();
                 } else {
-                    return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).build();
+                    throw new ApplicationSecurityException(HttpStatus.NOT_FOUND, "PHONE_NOT_AVAILABLE", "Phone not available");
                 }
             case EMAIL:
                 if (user.getEmail() != null) {
                     verificationService.sendEmailCode(user.getEmail(), user.getId());
                     return ResponseEntity.ok().build();
                 } else {
-                    return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).build();
+                    throw new ApplicationSecurityException(HttpStatus.NOT_FOUND, "EMAIL_NOT_AVAILABLE", "Email not available");
                 }
         }
         return ResponseEntity.ok().build();
@@ -155,7 +155,7 @@ public class AuthResource {
             Set<Role> roles = userService.getRoles(userDetails.getUsername());
             return ResponseEntity.ok().body(generateAuthResponse(userDetails, roles));
         } else {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).build();
+            throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED, "INVALID_EMAIL_CODE", "Invalid code");
         }
     }
 
@@ -171,7 +171,7 @@ public class AuthResource {
             Set<Role> roles = userService.getRoles(userDetails.getUsername());
             return ResponseEntity.ok().body(generateAuthResponse(userDetails, roles));
         } else {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).build();
+            throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED, "INVALID_PHONE_CODE", "Invalid code");
         }
     }
 
@@ -190,7 +190,7 @@ public class AuthResource {
         if (isValidToken) {
             return ResponseEntity.ok().body(generateAuthResponse(userDetails, roles));
         } else {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
+            throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED, "INVALID_TOKEN", "Invalid token");
         }
     }
 

@@ -43,10 +43,10 @@ public class VerificationResource {
                 userService.enableTotp(user.getUsername());
                 return ResponseEntity.ok().build();
             } else {
-                return ResponseEntity.status(HttpServletResponse.SC_FORBIDDEN).build();
+                throw new ApplicationSecurityException(HttpStatus.FORBIDDEN,"INVALID_TOTP_CODE", "Invalid TOTP code");
             }
         } else {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).build();
+            throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED,"INVALID_PASSWORD", "Invalid password");
         }
     }
 
@@ -58,10 +58,10 @@ public class VerificationResource {
             if (verifyEmail) {
                 return ResponseEntity.ok().build();
             } else {
-                return ResponseEntity.status(HttpServletResponse.SC_FORBIDDEN).build();
+                throw new ApplicationSecurityException(HttpStatus.FORBIDDEN,"INVALID_EMAIL_CODE", "Invalid email code");
             }
         } else {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).build();
+            throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED,"INVALID_PASSWORD", "Invalid password");
         }
     }
 
@@ -73,10 +73,10 @@ public class VerificationResource {
             if (verifyPhone) {
                 return ResponseEntity.ok().build();
             } else {
-                return ResponseEntity.status(HttpServletResponse.SC_FORBIDDEN).build();
+                throw new ApplicationSecurityException(HttpStatus.FORBIDDEN,"INVALID_PHONE_CODE", "Invalid phone code");
             }
         } else {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).build();
+            throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED,"INVALID_PASSWORD", "Invalid password");
         }
     }
 
