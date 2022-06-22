@@ -55,8 +55,8 @@ public class UserDTO implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
-        roles.forEach(role -> role.getPermissions().forEach(permission ->
-                authorities.add((GrantedAuthority) permission::getCode))
+        roles.forEach(role -> role.getAuthorities().forEach(authority ->
+                authorities.add((GrantedAuthority) authority::getCode))
         );
         return authorities;
     }

@@ -15,7 +15,7 @@ import java.util.Set;
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
-public class Permission {
+public class Authority {
 
     @Id
     @Column(nullable = false, updatable = false)
@@ -28,7 +28,7 @@ public class Permission {
     @Column(name = "\"description\"")
     private String description;
 
-    @ManyToMany(mappedBy = "permissions")
+    @ManyToMany(mappedBy = "authorities")
     private Set<Role> roles;
 
     @CreatedDate

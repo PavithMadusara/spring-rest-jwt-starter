@@ -11,7 +11,7 @@ public class Authorities {
     public static final String UPDATE_ROLE = "UPDATE_ROLE";
     public static final String DELETE_ROLE = "DELETE_ROLE";
 
-    public static final String READ_PERMISSION = "READ_PERMISSION";
-    public static final String UPDATE_PERMISSION = "UPDATE_PERMISSION";
+    public static final String READ_AUTHORITY = "READ_AUTHORITY";
+    public static final String UPDATE_AUTHORITY = "UPDATE_AUTHORITY";
 
 }

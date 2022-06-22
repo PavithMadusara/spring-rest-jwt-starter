@@ -1,10 +1,10 @@
 package com.aupma.spring.starter.security.service;
 
-import com.aupma.spring.starter.security.entity.Permission;
+import com.aupma.spring.starter.security.entity.Authority;
 import com.aupma.spring.starter.security.entity.Role;
-import com.aupma.spring.starter.security.model.PermissionDTO;
+import com.aupma.spring.starter.security.model.AuthorityDTO;
 import com.aupma.spring.starter.security.model.RoleDTO;
-import com.aupma.spring.starter.security.repos.PermissionRepository;
+import com.aupma.spring.starter.security.repos.AuthorityRepository;
 import com.aupma.spring.starter.security.repos.RoleRepository;
 import com.aupma.spring.starter.security.util.SimplePage;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +26,8 @@ import java.util.stream.Collectors;
 public class RoleService {
 
     private final RoleRepository roleRepository;
-    private final PermissionRepository permissionRepository;
-    private final PermissionService permissionService;
+    private final AuthorityRepository authorityRepository;
+    private final AuthorityService authorityService;
 
     public SimplePage<RoleDTO> paginate(final Pageable pageable) {
         final Page<Role> page = roleRepository.findAll(pageable);
@@ -69,9 +69,9 @@ public class RoleService {
         roleDTO.setId(role.getId());
         roleDTO.setName(role.getName());
         roleDTO.setLevel(role.getLevel());
-        if (role.getPermissions() != null) {
-            roleDTO.setPermissions(role.getPermissions().stream()
-                    .map(permission -> permissionService.mapToDTO(permission, new PermissionDTO()))
+        if (role.getAuthorities() != null) {
+            roleDTO.setAuthorities(role.getAuthorities().stream()
+                    .map(authority -> authorityService.mapToDTO(authority, new AuthorityDTO()))
                     .collect(Collectors.toList()));
         }
         return roleDTO;
@@ -80,13 +80,13 @@ public class RoleService {
     public void mapToEntity(final RoleDTO roleDTO, final Role role) {
         role.setName(roleDTO.getName());
         role.setLevel(roleDTO.getLevel());
-        if (roleDTO.getPermissions() != null) {
-            final List<Permission> permissions = permissionRepository.findAllById(roleDTO.getPermissions().stream()
-                    .map(PermissionDTO::getId).collect(Collectors.toList()));
-            if (permissions.size() != roleDTO.getPermissions().size()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "one of permissions not found");
+        if (roleDTO.getAuthorities() != null) {
+            final List<Authority> authorities = authorityRepository.findAllById(roleDTO.getAuthorities().stream()
+                    .map(AuthorityDTO::getId).collect(Collectors.toList()));
+            if (authorities.size() != roleDTO.getAuthorities().size()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "one of authorities not found");
             }
-            role.setPermissions(new HashSet<>(permissions));
+            role.setAuthorities(new HashSet<>(authorities));
         }
     }
 
