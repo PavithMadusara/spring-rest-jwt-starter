@@ -31,11 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 @EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-    private final UserDetailsService userDetailsService;
     private final JwtTokenFilter jwtTokenFilter;
-    private final PasswordEncoder passwordEncoder;
-
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();

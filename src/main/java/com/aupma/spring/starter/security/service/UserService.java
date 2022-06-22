@@ -155,21 +155,9 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username);
         if (user == null) {
-            log.error("User not found: {}", username);
             throw new UsernameNotFoundException(username);
-        } else {
-            log.info("User found: {}", username);
         }
-        Collection<GrantedAuthority> authorities = new ArrayList<>();
-        if (user.getRoles() != null) {
-            user.getRoles().forEach(role -> {
-                if (role.getPermissions() != null) {
-                    role.getPermissions()
-                            .forEach(permission -> authorities.add(new SimpleGrantedAuthority(permission.getCode())));
-                }
-            });
-        }
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
+        return mapToDTO(user, new UserDTO());
     }
 
     public Set<Role> getRoles(String username) {
@@ -191,6 +179,15 @@ public class UserService implements UserDetailsService {
             permissionDTO.setDescription(value);
 
             permissionService.create(permissionDTO);
+        }
+    }
+
+    public void syncPermissionToSuperAdmin() {
+        Role superAdmin = roleRepository.findByName("SUPER_ADMIN");
+        if (superAdmin != null) {
+            List<Permission> allPermissions = permissionRepository.findAll();
+            superAdmin.setPermissions(new HashSet<>(allPermissions));
+            roleRepository.save(superAdmin);
         }
     }
 

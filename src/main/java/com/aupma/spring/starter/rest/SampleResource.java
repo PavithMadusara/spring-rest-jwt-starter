@@ -1,10 +1,8 @@
 package com.aupma.spring.starter.rest;
 
 import com.aupma.spring.starter.model.SampleDTO;
-import com.aupma.spring.starter.security.exception.ApplicationSecurityException;
 import com.aupma.spring.starter.service.SampleService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

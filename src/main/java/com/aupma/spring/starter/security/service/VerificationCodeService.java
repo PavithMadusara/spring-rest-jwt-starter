@@ -26,7 +26,8 @@ public class VerificationCodeService {
 
 
     public VerificationCodeDTO get(final Long userId, final VerificationType type, final String code) {
-        VerificationCode verificationCode = verificationCodeRepository.findByCodeAndUserAndType(code, userId, type);
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        VerificationCode verificationCode = verificationCodeRepository.findByCodeAndUserAndType(code, user, type);
         if (verificationCode == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Verification code not found");
         } else {

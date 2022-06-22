@@ -1,6 +1,8 @@
 package com.aupma.spring.starter.security.rest;
 
 import com.aupma.spring.starter.security.entity.Role;
+import com.aupma.spring.starter.security.entity.User;
+import com.aupma.spring.starter.security.exception.ApplicationSecurityException;
 import com.aupma.spring.starter.security.model.*;
 import com.aupma.spring.starter.security.service.JwtTokenService;
 import com.aupma.spring.starter.security.service.TotpService;
@@ -8,13 +10,13 @@ import com.aupma.spring.starter.security.service.UserService;
 import com.aupma.spring.starter.security.service.VerificationService;
 import com.aupma.spring.starter.security.util.CurrentUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +45,7 @@ public class AuthResource {
                     new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
             );
 
-            User user = (User) authenticate.getPrincipal();
+            UserDTO user = (UserDTO) authenticate.getPrincipal();
 
             AuthResponseDTO authResponse = new AuthResponseDTO();
 
@@ -62,13 +64,13 @@ public class AuthResource {
 
 
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
+            throw new ApplicationSecurityException(HttpStatus.NOT_FOUND, "INVALID_CREDENTIALS", "Invalid username or password");
         }
     }
 
     @GetMapping("/reset-password")
     public ResponseEntity<Void> resetPassword(@RequestParam String username) {
-        com.aupma.spring.starter.security.entity.User user = userService.getUser(username);
+        User user = userService.getUser(username);
         if (user == null) {
             return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).body(null);
         }
@@ -78,7 +80,7 @@ public class AuthResource {
 
     @PostMapping("/reset-password")
     public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
-        com.aupma.spring.starter.security.entity.User user = userService.getUser(resetPasswordDTO.getUsername());
+        User user = userService.getUser(resetPasswordDTO.getUsername());
         if (user == null) {
             return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).body(null);
         }
@@ -91,7 +93,7 @@ public class AuthResource {
     }
 
     @PostMapping("/update-password")
-    public ResponseEntity<Void> updatePassword(@RequestBody UpdatePasswordDTO updatePasswordDTO, @CurrentUser com.aupma.spring.starter.security.entity.User user) {
+    public ResponseEntity<Void> updatePassword(@RequestBody UpdatePasswordDTO updatePasswordDTO, @CurrentUser User user) {
         boolean matches = passwordEncoder.matches(updatePasswordDTO.getOldPassword(), user.getPassword());
         if (!matches) {
             return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
@@ -102,7 +104,7 @@ public class AuthResource {
 
     @PostMapping(value = "/get-code", produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> sendCode(
-            @CurrentUser com.aupma.spring.starter.security.entity.User user,
+            @CurrentUser User user,
             @RequestParam VerificationType type
     ) {
         switch (type) {
@@ -130,9 +132,9 @@ public class AuthResource {
     public ResponseEntity<AuthResponseDTO> verifyTotp(
             Authentication authentication,
             @RequestBody MfaRequestDTO mfaRequest,
-            @CurrentUser com.aupma.spring.starter.security.entity.User user
+            @CurrentUser User user
     ) {
-        User userDetails = (User) authentication.getPrincipal();
+        UserDTO userDetails = (UserDTO) authentication.getPrincipal();
         boolean verified = totpService.verifyCode(mfaRequest.getCode(), user.getMfaSecret());
         if (verified) {
             Set<Role> roles = userService.getRoles(userDetails.getUsername());
@@ -146,9 +148,9 @@ public class AuthResource {
     public ResponseEntity<AuthResponseDTO> verifyEmail(
             Authentication authentication,
             @RequestBody MfaRequestDTO mfaRequest,
-            @CurrentUser com.aupma.spring.starter.security.entity.User user
+            @CurrentUser User user
     ) {
-        User userDetails = (User) authentication.getPrincipal();
+        UserDTO userDetails = (UserDTO) authentication.getPrincipal();
         Boolean verifyEmail = verificationService.verifyEmail(mfaRequest.getCode(), user.getId());
         if (verifyEmail) {
             Set<Role> roles = userService.getRoles(userDetails.getUsername());
@@ -162,9 +164,9 @@ public class AuthResource {
     public ResponseEntity<AuthResponseDTO> verifyPhone(
             Authentication authentication,
             @RequestBody MfaRequestDTO mfaRequest,
-            @CurrentUser com.aupma.spring.starter.security.entity.User user
+            @CurrentUser User user
     ) {
-        User userDetails = (User) authentication.getPrincipal();
+        UserDTO userDetails = (UserDTO) authentication.getPrincipal();
         Boolean verifyPhone = verificationService.verifyPhone(mfaRequest.getCode(), user.getId());
         if (verifyPhone) {
             Set<Role> roles = userService.getRoles(userDetails.getUsername());
@@ -175,21 +177,25 @@ public class AuthResource {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDTO> getCurrentUser(@CurrentUser com.aupma.spring.starter.security.entity.User user) {
+    public ResponseEntity<UserDTO> getCurrentUser(@CurrentUser User user) {
         return ResponseEntity.ok().body(userService.mapToDTO(user, new UserDTO()));
     }
 
     @PostMapping("/token-refresh")
     public ResponseEntity<AuthResponseDTO> refreshToken(@RequestBody TokenRequestDTO requestDTO) {
-        UserDetails userDetails = userService.loadUserByUsername(
-                tokenService.getUserNameFromToken(requestDTO.getRefreshToken())
-        );
-        Set<Role> roles = userService.getRoles(userDetails.getUsername());
-        boolean isValidToken = tokenService.validateToken(requestDTO.getRefreshToken(), userDetails);
-        if (isValidToken) {
-            return ResponseEntity.ok().body(generateAuthResponse(userDetails, roles));
-        } else {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
+        try {
+            UserDetails userDetails = userService.loadUserByUsername(
+                    tokenService.getUserNameFromToken(requestDTO.getRefreshToken())
+            );
+            Set<Role> roles = userService.getRoles(userDetails.getUsername());
+            boolean isValidToken = tokenService.validateToken(requestDTO.getRefreshToken(), userDetails);
+            if (isValidToken) {
+                return ResponseEntity.ok().body(generateAuthResponse(userDetails, roles));
+            } else {
+                throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED, "INVALID_TOKEN", "Invalid token");
+            }
+        } catch (Exception e) {
+            throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED, "INVALID_TOKEN", "Invalid token");
         }
     }
 
