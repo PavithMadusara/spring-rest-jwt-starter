@@ -2,7 +2,7 @@
 
 ### Features
 * Authorities - with Global Method Security `Secured`,`JSR250`,`PrePost`
-* Roles - User has many roles and role has many permissions (Authorities)
+* Roles - User has many roles and role has many authorities (Authorities)
 * Automatic Permission (Authorities) sync to database
 * User Management
 * Automatic Initial User initialization
@@ -16,7 +16,7 @@
 
 #### Authorities Usage Example
 Checkout rest endpoints for more
-```java
+```
 @GetMapping("/{id}")
 @PostAuthorize("hasAuthority('" + Authorities.READ_USER + "') or returnObject.body.username == principal.username")
 public ResponseEntity<UserDTO> getUser(@PathVariable("id") final Long id) {

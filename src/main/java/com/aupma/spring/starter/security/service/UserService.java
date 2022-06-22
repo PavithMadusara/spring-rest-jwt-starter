@@ -1,12 +1,12 @@
 package com.aupma.spring.starter.security.service;
 
-import com.aupma.spring.starter.security.entity.Permission;
+import com.aupma.spring.starter.security.entity.Authority;
 import com.aupma.spring.starter.security.entity.Role;
 import com.aupma.spring.starter.security.entity.User;
-import com.aupma.spring.starter.security.model.PermissionDTO;
+import com.aupma.spring.starter.security.model.AuthorityDTO;
 import com.aupma.spring.starter.security.model.RoleDTO;
 import com.aupma.spring.starter.security.model.UserDTO;
-import com.aupma.spring.starter.security.repos.PermissionRepository;
+import com.aupma.spring.starter.security.repos.AuthorityRepository;
 import com.aupma.spring.starter.security.repos.RoleRepository;
 import com.aupma.spring.starter.security.repos.UserRepository;
 import com.aupma.spring.starter.security.util.Authorities;
@@ -18,8 +18,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -44,8 +42,8 @@ public class UserService implements UserDetailsService {
     private final RoleRepository roleRepository;
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
-    private final PermissionRepository permissionRepository;
-    private final PermissionService permissionService;
+    private final AuthorityRepository authorityRepository;
+    private final AuthorityService authorityService;
     private final TotpService totpService;
 
     @Value("${initializer.username}")
@@ -169,24 +167,24 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username);
     }
 
-    public void syncPermissionToDatabase() throws IllegalAccessException {
+    public void syncAuthoritiesToDatabase() throws IllegalAccessException {
         for (Field field : Authorities.class.getFields()) {
             Object target = new Object();
             String value = (String) field.get(target);
 
-            PermissionDTO permissionDTO = new PermissionDTO();
-            permissionDTO.setCode(value);
-            permissionDTO.setDescription(value);
+            AuthorityDTO authorityDTO = new AuthorityDTO();
+            authorityDTO.setCode(value);
+            authorityDTO.setDescription(value);
 
-            permissionService.create(permissionDTO);
+            authorityService.create(authorityDTO);
         }
     }
 
-    public void syncPermissionToSuperAdmin() {
+    public void syncAuthoritiesToSuperAdmin() {
         Role superAdmin = roleRepository.findByName("SUPER_ADMIN");
         if (superAdmin != null) {
-            List<Permission> allPermissions = permissionRepository.findAll();
-            superAdmin.setPermissions(new HashSet<>(allPermissions));
+            List<Authority> allAuthorities = authorityRepository.findAll();
+            superAdmin.setAuthorities(new HashSet<>(allAuthorities));
             roleRepository.save(superAdmin);
         }
     }
@@ -199,16 +197,16 @@ public class UserService implements UserDetailsService {
             adminRole.setName("SUPER_ADMIN");
             adminRole.setLevel(0);
             Role admin = roleRepository.findByName("SUPER_ADMIN");
-            List<Permission> allPermissions = permissionRepository.findAll();
+            List<Authority> allAuthorities = authorityRepository.findAll();
 
             if (admin != null) {
                 adminRole = admin;
-                if (adminRole.getPermissions().size() < allPermissions.size()) {
-                    adminRole.setPermissions(new HashSet<>(allPermissions));
+                if (adminRole.getAuthorities().size() < allAuthorities.size()) {
+                    adminRole.setAuthorities(new HashSet<>(allAuthorities));
                     roleRepository.save(adminRole);
                 }
             } else {
-                adminRole.setPermissions(new HashSet<>(allPermissions));
+                adminRole.setAuthorities(new HashSet<>(allAuthorities));
                 roleRepository.save(adminRole);
             }
 

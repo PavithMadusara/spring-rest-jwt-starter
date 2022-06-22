@@ -15,10 +15,10 @@ public class StartupRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        userService.syncPermissionToDatabase();
+        userService.syncAuthoritiesToDatabase();
         if (initializerEnabled) {
             userService.createAdminIfNotExists();
-            userService.syncPermissionToSuperAdmin();
+            userService.syncAuthoritiesToSuperAdmin();
         }
     }
 }

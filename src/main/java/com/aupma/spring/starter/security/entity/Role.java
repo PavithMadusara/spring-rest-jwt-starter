@@ -31,11 +31,11 @@ public class Role {
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(
-            name = "role_permissions",
+            name = "role_authorities",
             joinColumns = @JoinColumn(name = "role_id"),
-            inverseJoinColumns = @JoinColumn(name = "permission_id")
+            inverseJoinColumns = @JoinColumn(name = "authority_id")
     )
-    private Set<Permission> permissions;
+    private Set<Authority> authorities;
 
     @ManyToMany(mappedBy = "roles")
     private Set<User> users;

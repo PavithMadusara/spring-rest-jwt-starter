@@ -21,6 +21,6 @@ public class RoleDTO {
     @NotNull
     private Integer level;
 
-    private List<PermissionDTO> permissions;
+    private List<AuthorityDTO> authorities;
 
 }

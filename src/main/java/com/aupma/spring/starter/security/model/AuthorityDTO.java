@@ -9,7 +9,7 @@ import javax.validation.constraints.Size;
 
 @Getter
 @Setter
-public class PermissionDTO {
+public class AuthorityDTO {
 
     private Long id;
 
