@@ -155,7 +155,9 @@ public class UserService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException(username);
         }
-        return mapToDTO(user, new UserDTO());
+        UserDTO dto = mapToDTO(user, new UserDTO());
+        dto.setPassword(user.getPassword());
+        return dto;
     }
 
     public Set<Role> getRoles(String username) {
