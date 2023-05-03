@@ -12,7 +12,7 @@ import java.util.Set;
 
 
 @Entity
-@Table(name="\"user\"")
+@Table(name = "\"user\"")
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter

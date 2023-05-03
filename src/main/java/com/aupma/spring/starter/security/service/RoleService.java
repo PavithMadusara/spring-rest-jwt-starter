@@ -6,7 +6,6 @@ import com.aupma.spring.starter.security.model.AuthorityDTO;
 import com.aupma.spring.starter.security.model.RoleDTO;
 import com.aupma.spring.starter.security.repos.AuthorityRepository;
 import com.aupma.spring.starter.security.repos.RoleRepository;
-import com.aupma.spring.starter.security.util.SimplePage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,13 +27,8 @@ public class RoleService {
     private final AuthorityRepository authorityRepository;
     private final AuthorityService authorityService;
 
-    public SimplePage<RoleDTO> paginate(final Pageable pageable) {
-        final Page<Role> page = roleRepository.findAll(pageable);
-        return new SimplePage<>(page.getContent()
-                .stream()
-                .map(role -> mapToDTO(role, new RoleDTO()))
-                .toList(),
-                page.getTotalElements(), pageable);
+    public Page<RoleDTO> paginate(final Pageable pageable) {
+        return roleRepository.findAll(pageable).map(role -> mapToDTO(role, new RoleDTO()));
     }
 
     public List<RoleDTO> findAll() {

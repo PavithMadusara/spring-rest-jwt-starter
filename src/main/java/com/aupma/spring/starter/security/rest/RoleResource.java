@@ -3,8 +3,8 @@ package com.aupma.spring.starter.security.rest;
 import com.aupma.spring.starter.security.model.RoleDTO;
 import com.aupma.spring.starter.security.service.RoleService;
 import com.aupma.spring.starter.security.util.Authorities;
-import com.aupma.spring.starter.security.util.SimplePage;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -29,7 +29,7 @@ public class RoleResource {
     }
 
     @GetMapping("/paginate")
-    public ResponseEntity<SimplePage<RoleDTO>> paginateRoles(
+    public ResponseEntity<Page<RoleDTO>> paginateRoles(
             @SortDefault(sort = "id", direction = Sort.Direction.ASC)
             @PageableDefault(size = 15) final Pageable pageable
     ) {
