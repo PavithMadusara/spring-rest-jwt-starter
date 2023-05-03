@@ -9,6 +9,7 @@ import com.aupma.spring.starter.security.service.TotpService;
 import com.aupma.spring.starter.security.service.UserService;
 import com.aupma.spring.starter.security.service.VerificationService;
 import com.aupma.spring.starter.security.util.CurrentUser;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,7 +22,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Set;
 
