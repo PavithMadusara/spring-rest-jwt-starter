@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 @Setter
 @AllArgsConstructor
 public class ApplicationSecurityException extends RuntimeException {
-    private HttpStatus status;
-    private String code;
-    private String message;
+    private final HttpStatus status;
+    private final String code;
+    private final String message;
 }

@@ -17,7 +17,7 @@ public class SampleService {
     public List<SampleDTO> findByName(String name) {
         return sampleRepository.findByName(name).stream()
                 .map(sample -> mapToDTO(sample, new SampleDTO()))
-                .collect(java.util.stream.Collectors.toList());
+                .toList();
     }
 
     public SampleDTO mapToDTO(Sample sample, SampleDTO sampleDTO) {

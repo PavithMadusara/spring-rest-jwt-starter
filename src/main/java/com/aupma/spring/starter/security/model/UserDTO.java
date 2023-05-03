@@ -1,12 +1,12 @@
 package com.aupma.spring.starter.security.model;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -78,7 +78,7 @@ public class UserDTO implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return isApproved;
+        return isAccountNonExpired();
     }
 
 }

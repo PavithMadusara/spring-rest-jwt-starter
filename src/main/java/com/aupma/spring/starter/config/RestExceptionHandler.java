@@ -3,7 +3,6 @@ package com.aupma.spring.starter.config;
 import com.aupma.spring.starter.model.ErrorResponse;
 import com.aupma.spring.starter.model.FieldError;
 import com.aupma.spring.starter.security.config.SecurityExceptionHandler;
-import com.aupma.spring.starter.security.exception.ApplicationSecurityException;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +24,10 @@ public class RestExceptionHandler extends SecurityExceptionHandler {
     @ApiResponse(responseCode = "4xx/5xx", description = "Error")
     public ResponseEntity<ErrorResponse> handleNotFound(final ResponseStatusException exception) {
         final ErrorResponse errorResponse = new ErrorResponse();
-        errorResponse.setHttpStatus(exception.getStatus().value());
+        errorResponse.setHttpStatus(exception.getStatusCode().value());
         errorResponse.setException(exception.getClass().getSimpleName());
         errorResponse.setMessage(exception.getMessage());
-        return new ResponseEntity<>(errorResponse, exception.getStatus());
+        return new ResponseEntity<>(errorResponse, exception.getStatusCode());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -43,7 +42,7 @@ public class RestExceptionHandler extends SecurityExceptionHandler {
                     fieldError.setField(error.getField());
                     return fieldError;
                 })
-                .collect(Collectors.toList());
+                .toList();
         final ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setHttpStatus(HttpStatus.BAD_REQUEST.value());
         errorResponse.setException(exception.getClass().getSimpleName());

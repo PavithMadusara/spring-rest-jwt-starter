@@ -10,7 +10,6 @@ import com.aupma.spring.starter.security.repos.AuthorityRepository;
 import com.aupma.spring.starter.security.repos.RoleRepository;
 import com.aupma.spring.starter.security.repos.UserRepository;
 import com.aupma.spring.starter.security.util.Authorities;
-import com.aupma.spring.starter.security.util.SimplePage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,11 +22,14 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.transaction.Transactional;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -60,16 +62,12 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll()
                 .stream()
                 .map(user -> mapToDTO(user, new UserDTO()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    public SimplePage<UserDTO> paginate(final Pageable pageable) {
-        final Page<User> page = userRepository.findAll(pageable);
-        return new SimplePage<>(page.getContent()
-                .stream()
-                .map(user -> mapToDTO(user, new UserDTO()))
-                .collect(Collectors.toList()),
-                page.getTotalElements(), pageable);
+    public Page<UserDTO> paginate(final Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(user -> mapToDTO(user, new UserDTO()));
     }
 
     public UserDTO get(final Long id) {
@@ -121,7 +119,7 @@ public class UserService implements UserDetailsService {
         userDTO.setIsMfaEnabled(user.getIsMfaEnabled());
         userDTO.setIsApproved(user.getIsApproved());
         userDTO.setRoles(user.getRoles() == null ? null : user.getRoles().stream()
-                .map(role -> roleService.mapToDTO(role, new RoleDTO())).collect(Collectors.toList()));
+                .map(role -> roleService.mapToDTO(role, new RoleDTO())).toList());
         return userDTO;
     }
 
@@ -141,7 +139,7 @@ public class UserService implements UserDetailsService {
         user.setIsApproved(userDTO.getIsApproved());
         if (userDTO.getRoles() != null) {
             final List<Role> roles = roleRepository.findAllById(userDTO.getRoles().stream().map(RoleDTO::getId)
-                    .collect(Collectors.toList()));
+                    .toList());
             if (roles.size() != userDTO.getRoles().size()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "one of roles not found");
             }
@@ -193,8 +191,8 @@ public class UserService implements UserDetailsService {
 
     public void createAdminIfNotExists() {
 
-        List<User> admins = userRepository.findByRoles_Name("SUPER_ADMIN");
-        if (admins.size() == 0) {
+        List<User> admins = userRepository.findByRoleName("SUPER_ADMIN");
+        if (admins.isEmpty()) {
             Role adminRole = new Role();
             adminRole.setName("SUPER_ADMIN");
             adminRole.setLevel(0);

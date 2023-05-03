@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping(value = "/api/verification", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -43,10 +42,10 @@ public class VerificationResource {
                 userService.enableTotp(user.getUsername());
                 return ResponseEntity.ok().build();
             } else {
-                throw new ApplicationSecurityException(HttpStatus.FORBIDDEN,"INVALID_TOTP_CODE", "Invalid TOTP code");
+                throw new ApplicationSecurityException(HttpStatus.FORBIDDEN, "INVALID_TOTP_CODE", "Invalid TOTP code");
             }
         } else {
-            throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED,"INVALID_PASSWORD", "Invalid password");
+            throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED, "INVALID_PASSWORD", "Invalid password");
         }
     }
 
@@ -58,10 +57,10 @@ public class VerificationResource {
             if (verifyEmail) {
                 return ResponseEntity.ok().build();
             } else {
-                throw new ApplicationSecurityException(HttpStatus.FORBIDDEN,"INVALID_EMAIL_CODE", "Invalid email code");
+                throw new ApplicationSecurityException(HttpStatus.FORBIDDEN, "INVALID_EMAIL_CODE", "Invalid email code");
             }
         } else {
-            throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED,"INVALID_PASSWORD", "Invalid password");
+            throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED, "INVALID_PASSWORD", "Invalid password");
         }
     }
 
@@ -73,10 +72,10 @@ public class VerificationResource {
             if (verifyPhone) {
                 return ResponseEntity.ok().build();
             } else {
-                throw new ApplicationSecurityException(HttpStatus.FORBIDDEN,"INVALID_PHONE_CODE", "Invalid phone code");
+                throw new ApplicationSecurityException(HttpStatus.FORBIDDEN, "INVALID_PHONE_CODE", "Invalid phone code");
             }
         } else {
-            throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED,"INVALID_PASSWORD", "Invalid password");
+            throw new ApplicationSecurityException(HttpStatus.UNAUTHORIZED, "INVALID_PASSWORD", "Invalid password");
         }
     }
 

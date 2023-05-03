@@ -3,13 +3,13 @@ package com.aupma.spring.starter.security.rest;
 import com.aupma.spring.starter.security.model.AuthorityDTO;
 import com.aupma.spring.starter.security.service.AuthorityService;
 import com.aupma.spring.starter.security.util.Authorities;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController

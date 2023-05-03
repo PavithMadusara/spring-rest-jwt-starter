@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -61,7 +60,7 @@ public class JwtTokenService {
         try {
             Claims claims = getClaimsFromToken(token);
             username = claims.getSubject();
-        } catch (Exception e) {
+        } catch (NullPointerException e) {
             username = null;
         }
         return username;
@@ -78,15 +77,19 @@ public class JwtTokenService {
     }
 
     public Date getExpiredDateFromToken(String token) {
-        Claims claims = getClaimsFromToken(token);
-        return claims.getExpiration();
+        try {
+            Claims claims = getClaimsFromToken(token);
+            return claims.getExpiration();
+        } catch (NullPointerException e) {
+            return null;
+        }
     }
 
     public String generateAccessToken(UserDetails userDetails, List<Role> roles) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_KEY_USERNAME, userDetails.getUsername());
         claims.put(CLAIM_KEY_CREATED, new Date());
-        claims.put(CLAIM_KEY_ROLES, roles.stream().map(Role::getName).collect(Collectors.toList()));
+        claims.put(CLAIM_KEY_ROLES, roles.stream().map(Role::getName).toList());
         return generateToken(claims, accessTokenLife);
     }
 

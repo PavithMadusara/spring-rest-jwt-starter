@@ -9,6 +9,7 @@ import com.aupma.spring.starter.security.service.TotpService;
 import com.aupma.spring.starter.security.service.UserService;
 import com.aupma.spring.starter.security.service.VerificationService;
 import com.aupma.spring.starter.security.util.CurrentUser;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,7 +22,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -85,7 +85,7 @@ public class AuthResource {
             return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).body(null);
         }
         Boolean verified = verificationService.verifyResetToken(user.getId(), resetPasswordDTO.getToken());
-        if (!verified) {
+        if (Boolean.FALSE.equals(verified)) {
             return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body(null);
         }
         userService.updatePassword(user.getId(), resetPasswordDTO.getPassword());
@@ -108,22 +108,29 @@ public class AuthResource {
             @RequestParam VerificationType type
     ) {
         switch (type) {
-            case TOTP:
+            case TOTP -> {
                 return ResponseEntity.ok(totpService.getUriForImage(user.getMfaSecret()));
-            case PHONE:
+            }
+            case PHONE -> {
                 if (user.getPhone() != null) {
                     verificationService.sendOTPCode(user.getPhone(), user.getId());
                     return ResponseEntity.ok().build();
                 } else {
                     return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).build();
                 }
-            case EMAIL:
+            }
+            case EMAIL -> {
                 if (user.getEmail() != null) {
                     verificationService.sendEmailCode(user.getEmail(), user.getId());
                     return ResponseEntity.ok().build();
                 } else {
                     return ResponseEntity.status(HttpServletResponse.SC_NOT_FOUND).build();
                 }
+            }
+            case PASSWORD_RESET -> {
+                verificationService.sendPasswordResetLink(user.getId());
+                return ResponseEntity.ok().build();
+            }
         }
         return ResponseEntity.ok().build();
     }
@@ -152,7 +159,7 @@ public class AuthResource {
     ) {
         UserDTO userDetails = (UserDTO) authentication.getPrincipal();
         Boolean verifyEmail = verificationService.verifyEmail(mfaRequest.getCode(), user.getId());
-        if (verifyEmail) {
+        if (Boolean.TRUE.equals(verifyEmail)) {
             Set<Role> roles = userService.getRoles(userDetails.getUsername());
             return ResponseEntity.ok().body(generateAuthResponse(userDetails, roles));
         } else {
@@ -168,7 +175,7 @@ public class AuthResource {
     ) {
         UserDTO userDetails = (UserDTO) authentication.getPrincipal();
         Boolean verifyPhone = verificationService.verifyPhone(mfaRequest.getCode(), user.getId());
-        if (verifyPhone) {
+        if (Boolean.TRUE.equals(verifyPhone)) {
             Set<Role> roles = userService.getRoles(userDetails.getUsername());
             return ResponseEntity.ok().body(generateAuthResponse(userDetails, roles));
         } else {
