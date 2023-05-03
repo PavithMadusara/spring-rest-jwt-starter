@@ -3,8 +3,8 @@ package com.aupma.spring.starter.security.rest;
 import com.aupma.spring.starter.security.model.UserDTO;
 import com.aupma.spring.starter.security.service.UserService;
 import com.aupma.spring.starter.security.util.Authorities;
-import com.aupma.spring.starter.security.util.SimplePage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -26,7 +26,7 @@ public class UserResource {
 
     @GetMapping
     @PreAuthorize("hasAuthority('" + Authorities.READ_USER + "')")
-    public ResponseEntity<SimplePage<UserDTO>> paginateUsers(
+    public ResponseEntity<Page<UserDTO>> paginateUsers(
             @SortDefault(sort = "firstName", direction = Sort.Direction.ASC)
             @PageableDefault(size = 15) final Pageable pageable
     ) {
