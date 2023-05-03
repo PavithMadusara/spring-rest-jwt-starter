@@ -66,7 +66,7 @@ class UserRepositoryTest {
         underTest.save(user1);
 
         // when
-        List<User> users = underTest.findByRoles_Name(roleName);
+        List<User> users = underTest.findByRoleName(roleName);
 
         // then
         assertEquals(1, users.size());

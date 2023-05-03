@@ -24,7 +24,7 @@ public class AuthorityService {
         return authorityRepository.findAll()
                 .stream()
                 .map(authority -> mapToDTO(authority, new AuthorityDTO()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public AuthorityDTO get(final Long id) {

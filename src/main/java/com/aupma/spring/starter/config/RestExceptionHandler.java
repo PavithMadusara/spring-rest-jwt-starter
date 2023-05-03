@@ -42,7 +42,7 @@ public class RestExceptionHandler extends SecurityExceptionHandler {
                     fieldError.setField(error.getField());
                     return fieldError;
                 })
-                .collect(Collectors.toList());
+                .toList();
         final ErrorResponse errorResponse = new ErrorResponse();
         errorResponse.setHttpStatus(HttpStatus.BAD_REQUEST.value());
         errorResponse.setException(exception.getClass().getSimpleName());

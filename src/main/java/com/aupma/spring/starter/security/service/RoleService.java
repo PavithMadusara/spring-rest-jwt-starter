@@ -17,7 +17,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -34,13 +33,13 @@ public class RoleService {
         return new SimplePage<>(page.getContent()
                 .stream()
                 .map(role -> mapToDTO(role, new RoleDTO()))
-                .collect(Collectors.toList()),
+                .toList(),
                 page.getTotalElements(), pageable);
     }
 
     public List<RoleDTO> findAll() {
         return roleRepository.findAll().stream().map(role -> mapToDTO(role, new RoleDTO()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public RoleDTO get(final Long id) {
@@ -72,7 +71,7 @@ public class RoleService {
         if (role.getAuthorities() != null) {
             roleDTO.setAuthorities(role.getAuthorities().stream()
                     .map(authority -> authorityService.mapToDTO(authority, new AuthorityDTO()))
-                    .collect(Collectors.toList()));
+                    .toList());
         }
         return roleDTO;
     }
@@ -82,7 +81,7 @@ public class RoleService {
         role.setLevel(roleDTO.getLevel());
         if (roleDTO.getAuthorities() != null) {
             final List<Authority> authorities = authorityRepository.findAllById(roleDTO.getAuthorities().stream()
-                    .map(AuthorityDTO::getId).collect(Collectors.toList()));
+                    .map(AuthorityDTO::getId).toList());
             if (authorities.size() != roleDTO.getAuthorities().size()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "one of authorities not found");
             }

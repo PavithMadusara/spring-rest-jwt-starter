@@ -1,6 +1,9 @@
 package com.aupma.spring.starter.security.util;
 
 public class Authorities {
+
+    private Authorities() {}
+
     public static final String READ_USER = "READ_USER";
     public static final String CREATE_USER = "CREATE_USER";
     public static final String UPDATE_USER = "UPDATE_USER";
